@@ -1,231 +1,365 @@
-# ZK-Notary: Certificate-Based Zero-Knowledge Proof Attestation Service
+# ZK-Marketplace: Auction-Based Zero-Knowledge Proof Verification Platform
 
-A decentralized notarization system built on Stacks blockchain that issues cryptographic certificates for verified zero-knowledge proofs. ZK-Notary enables trusted attestation of ZK proofs through licensed notaries and provides a robust certification infrastructure.
+A decentralized marketplace built on Stacks blockchain where clients post zero-knowledge proof verification jobs and validators compete through competitive bidding to provide verification services.
 
 ## 🎯 Overview
 
-ZK-Notary is a smart contract system that:
-- Issues digital certificates for verified zero-knowledge proofs
-- Manages a network of licensed notaries who can attest to proof validity
-- Supports multiple cryptographic schemes (zk-SNARKs, zk-STARKs, Bulletproofs, PLONK)
-- Provides certificate lifecycle management (issuance, renewal, transfer, revocation)
-- Implements a stake-based security model for notary licensing
+ZK-Marketplace creates a trustless, auction-based ecosystem for zero-knowledge proof verification by:
+- Enabling clients to post verification jobs with budgets and requirements
+- Allowing qualified validators to bid competitively on verification tasks
+- Supporting multiple ZK proof protocols (STARK, SNARK, Bulletproof, Sonic)
+- Providing automated escrow and payment settlement
+- Tracking validator performance and reputation metrics
 
 ## 🏗️ Architecture
 
 ### Core Components
 
-1. **Certificate System**: Digital certificates that attest to the validity of zero-knowledge proofs
-2. **Notary Network**: Licensed entities that can issue and manage certificates
-3. **Scheme Registry**: Supported cryptographic proof schemes with their parameters
-4. **Holder Profiles**: User accounts that own and manage certificates
+1. **Job Marketplace**: Clients post verification jobs with budgets and deadlines
+2. **Validator Network**: Registered verifiers with expertise profiles and ratings
+3. **Bidding System**: Competitive auction mechanism for job assignment
+4. **Protocol Registry**: Supported ZK proof types with configuration parameters
+5. **Reputation System**: Performance tracking and rating system for validators
 
-### Supported Cryptographic Schemes
+### Supported Protocols
 
-- **zk-SNARK Groth16**: 1.0 STX certification cost, 1000 block validity
-- **zk-STARK FRI**: 1.2 STX certification cost, 1200 block validity  
-- **Bulletproof Plus**: 0.8 STX certification cost, 800 block validity
-- **PLONK-KZG**: 1.1 STX certification cost, 1100 block validity
+- **STARK**: 0.6 STX minimum fee, complexity rating 8/10, ~120 blocks completion time
+- **SNARK**: 0.5 STX minimum fee, complexity rating 6/10, ~100 blocks completion time  
+- **Bulletproof**: 0.4 STX minimum fee, complexity rating 4/10, ~80 blocks completion time
+- **Sonic**: 0.55 STX minimum fee, complexity rating 7/10, ~110 blocks completion time
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 
 - Stacks wallet with STX tokens
-- Access to Stacks blockchain (mainnet or testnet)
-- Understanding of zero-knowledge proofs
+- Understanding of zero-knowledge proof verification
+- For validators: expertise in cryptographic proof systems
 
 ### System Initialization
 
-The notary authority must first establish the system:
+The marketplace owner must initialize the platform:
 
 ```clarity
-;; Initialize the notary system with supported schemes
-(contract-call? .zk-notary establish-notary-system)
+;; Initialize marketplace with supported protocols
+(contract-call? .zk-marketplace initialize-marketplace)
 ```
 
 ## 👥 User Roles
 
-### 1. Notary Authority
-- System administrator
-- Can register new cryptographic schemes
-- Can suspend/activate the system
-- Can adjust fees and collect revenue
+### 1. Marketplace Owner
+- Platform administrator and operator
+- Can add new ZK protocols
+- Can enable/disable the marketplace
+- Can withdraw platform earnings
+- Sets global parameters like minimum bid amounts
 
-### 2. Licensed Notaries
-- Stake STX to become licensed (minimum 3 STX)
-- Issue certificates for verified proofs
-- Build credibility through successful attestations
-- Can revoke certificates they issued
+### 2. Clients (Proof Requesters)
+- Post verification jobs with budgets
+- Review and accept validator bids
+- Pay for successful verifications
+- Can withdraw funds from expired jobs
 
-### 3. Certificate Holders
-- Own digital certificates for their proofs
-- Can renew and transfer certificates
-- Pay certification fees
+### 3. Validators (Proof Verifiers)
+- Register with business profiles and expertise areas
+- Bid on verification jobs
+- Perform proof verification work
+- Build reputation through successful completions
 
-## 📋 Core Functions
+## 📋 Core Workflows
 
-### Becoming a Licensed Notary
+### Becoming a Validator
 
 ```clarity
-;; Apply for notary license
-(contract-call? .zk-notary apply-for-notary-license 
-  "My Crypto Lab"  ;; license name
-  (list "zk-snark-groth16" "bulletproof-plus")  ;; certified schemes
-  u5000000)  ;; stake amount (5 STX)
+;; Register as a marketplace validator
+(contract-call? .zk-marketplace join-as-validator 
+  "CryptoProof Labs"  ;; business name
+  (list "stark" "snark" "bulletproof"))  ;; expertise areas
 ```
 
-### Issuing Certificates
+### Posting a Verification Job
 
 ```clarity
-;; Issue a certificate for a verified proof
-(contract-call? .zk-notary issue-certificate
-  'SP1ABC...XYZ  ;; certificate holder
-  "zk-snark-groth16"  ;; proof scheme
-  0x1234...abcd  ;; proof digest
-  0xabcd...1234  ;; public inputs
-  0x9876...cdef  ;; verification key  
-  u4)  ;; attestation level (1-5)
+;; Post a new verification job
+(contract-call? .zk-marketplace post-verification-job
+  "stark"  ;; protocol type
+  0x1234...abcd  ;; proof data hash
+  0xabcd...1234  ;; input parameters
+  0x9876...cdef  ;; verification key
+  u2000000  ;; max budget (2 STX)
+  u200)  ;; bidding window (200 blocks)
 ```
 
-### Batch Certificate Issuance
+### Submitting a Bid
 
 ```clarity
-;; Issue multiple certificates in one transaction
-(contract-call? .zk-notary batch-issue-certificates
-  (list 'SP1ABC...XYZ 'SP2DEF...UVW)  ;; holders
-  (list "zk-snark-groth16" "bulletproof-plus")  ;; schemes
-  (list 0x1234...abcd 0x5678...efgh)  ;; proof digests
-  (list u4 u3))  ;; attestation levels
+;; Submit competitive bid for a job
+(contract-call? .zk-marketplace submit-bid
+  u1  ;; job ID
+  u1500000  ;; bid amount (1.5 STX)
+  u150)  ;; estimated completion time (blocks)
 ```
 
-### Certificate Management
+### Accepting a Bid
 
 ```clarity
-;; Renew certificate (50% of original fee)
-(contract-call? .zk-notary renew-certificate u1)
+;; Client accepts a validator's bid
+(contract-call? .zk-marketplace accept-bid
+  u1  ;; job ID  
+  'SPVALIDATOR...ADDRESS)  ;; chosen validator
+```
 
-;; Transfer certificate to new holder (0.1 STX fee)
-(contract-call? .zk-notary transfer-certificate u1 'SPNEW...OWNER)
+### Completing Verification
 
-;; Revoke certificate (notary only)
-(contract-call? .zk-notary revoke-certificate u1)
+```clarity
+;; Validator submits verification results
+(contract-call? .zk-marketplace complete-verification
+  u1  ;; job ID
+  true)  ;; verification successful
 ```
 
 ## 🔍 Query Functions
 
-### Certificate Information
+### Job Information
 
 ```clarity
-;; Get certificate details
-(contract-call? .zk-notary get-certificate u1)
+;; Get job details and status
+(contract-call? .zk-marketplace get-job-details u1)
 
-;; Check if certificate is valid
-(contract-call? .zk-notary is-certificate-valid u1)
+;; Check if job verification was successful
+(contract-call? .zk-marketplace is-job-verified u1)
 ```
 
-### Notary Information
+### Validator Profiles
 
 ```clarity
-;; Get notary details
-(contract-call? .zk-notary get-notary-info 'SPNOTARY...ADDRESS)
+;; Get validator business profile
+(contract-call? .zk-marketplace get-validator-profile 'SPVALIDATOR...ADDRESS)
 ```
 
-### Holder Profiles
+### Bid Tracking
 
 ```clarity
-;; Get holder statistics
-(contract-call? .zk-notary get-holder-profile 'SPHOLDER...ADDRESS)
+;; Get specific bid information
+(contract-call? .zk-marketplace get-bid-info u1 'SPVALIDATOR...ADDRESS)
 ```
 
-### Scheme Details
+### Client Activity
 
 ```clarity
-;; Get scheme configuration
-(contract-call? .zk-notary get-scheme-details "zk-snark-groth16")
+;; Get client statistics
+(contract-call? .zk-marketplace get-client-stats 'SPCLIENT...ADDRESS)
 ```
 
-## 💰 Fee Structure
+### Protocol Details
 
-- **Base Certification Fee**: 1.5 STX (adjustable by authority)
-- **Scheme-Specific Costs**: 0.8 - 1.2 STX depending on scheme
-- **Minimum Notary Stake**: 3 STX
-- **Certificate Renewal**: 50% of original certification cost
-- **Certificate Transfer**: 0.1 STX
+```clarity
+;; Get protocol configuration
+(contract-call? .zk-marketplace get-protocol-details "stark")
+
+;; Get current minimum bid
+(contract-call? .zk-marketplace get-minimum-bid-amount)
+```
+
+## 💰 Economic Model
+
+### Fee Structure
+- **Minimum Bid**: 0.5 STX (configurable by owner)
+- **Protocol-Specific Minimums**: 0.4 - 0.6 STX based on complexity
+- **Escrow System**: Client funds locked until job completion
+- **Automatic Refunds**: Unused budget returned to clients
+
+### Payment Flow
+1. Client locks maximum budget when posting job
+2. Validators submit competitive bids
+3. Client accepts winning bid
+4. Upon completion, validator receives bid amount
+5. Remaining budget refunded to client
 
 ## 🔒 Security Features
 
-### Stake-Based Security
-- Notaries must stake STX tokens to operate
-- Higher stakes required for more complex schemes
-- Economic incentives for honest behavior
+### Escrow Protection
+- Client funds locked in smart contract
+- Automatic payment release on completion
+- Refund mechanism for expired jobs
 
-### Attestation Levels
-- 5-tier confidence system (1-5)
-- Allows nuanced trust assessment
-- Notary reputation tracking
+### Reputation System
+- Success rate tracking for validators
+- Performance-based rating adjustments
+- Historical job completion metrics
 
-### Certificate Lifecycle
-- Time-bound validity periods
-- Revocation capabilities
-- Transfer restrictions
+### Quality Assurance
+- Protocol-specific complexity ratings
+- Minimum bid requirements prevent spam
+- Time-bounded bidding windows
 
-## 📊 Certificate Structure
+## 📊 Job Structure
 
-Each certificate contains:
-- **Holder**: Certificate owner address
-- **Scheme Name**: Cryptographic proof scheme used
-- **Proof Digest**: Hash of the original proof
-- **Public Inputs**: Proof's public parameters
-- **Verification Key**: Key for proof verification
-- **Attestation Level**: Confidence level (1-5)
-- **Issuing Notary**: Notary who issued the certificate
-- **Issuance Date**: Block height when issued
-- **Validity Period**: Expiration block height
-- **Revocation Status**: Whether certificate is revoked
+Each verification job contains:
+- **Client**: Job poster address
+- **Protocol Type**: ZK proof scheme (STARK, SNARK, etc.)
+- **Proof Data**: Hash of the proof to verify
+- **Input Parameters**: Public inputs for verification
+- **Verification Key**: Cryptographic key for proof validation
+- **Max Budget**: Maximum payment amount
+- **Winning Bid**: Accepted bid amount
+- **Assigned Validator**: Selected verifier address
+- **Completion Status**: Job and verification status
+- **Timestamps**: Posting time and bid deadline
+
+## 📈 Validator Profile
+
+Each validator maintains:
+- **Business Name**: Public identifier
+- **Expertise Areas**: Supported protocols list
+- **Success Rate**: Percentage of successful verifications
+- **Jobs Completed**: Total verification count
+- **Average Rating**: Performance score
+- **Availability Status**: Currently accepting jobs
 
 ## 🛡️ Error Codes
 
-- `u400`: Unauthorized access
-- `u401`: Certificate not found
-- `u402`: Invalid certificate
-- `u403`: Certificate already exists
-- `u404`: Insufficient stake
-- `u405`: Notary suspended
-- `u406`: Unknown scheme
+- `u300`: Forbidden access/unauthorized operation
+- `u301`: Job not found
+- `u302`: Invalid job parameters or state
+- `u303`: Job already exists/completed
+- `u304`: Bid amount too low
+- `u305`: Validator not found/registered
+- `u306`: Unsupported protocol type
 
 ## 🔧 Administrative Functions
 
-System authority can:
-- Adjust certification fees
-- Register new cryptographic schemes
-- Suspend/activate the notary system
-- Collect system revenue
+### Protocol Management
+```clarity
+;; Add new ZK protocol support
+(contract-call? .zk-marketplace add-protocol
+  "plonk"  ;; protocol name
+  u700000  ;; minimum fee (0.7 STX)
+  u9  ;; complexity rating
+  u140)  ;; average completion time
+```
+
+### Platform Control
+```clarity
+;; Update minimum bid requirements
+(contract-call? .zk-marketplace update-minimum-bid u600000)
+
+;; Temporarily disable marketplace
+(contract-call? .zk-marketplace disable-marketplace)
+
+;; Re-enable marketplace operations
+(contract-call? .zk-marketplace enable-marketplace)
+```
 
 ## 🌐 Use Cases
 
-1. **DeFi Protocol Verification**: Attest to valid proofs in privacy-preserving DeFi
-2. **Identity Verification**: Zero-knowledge identity proofs with certification
-3. **Academic Credentials**: Certify educational achievements without revealing details
-4. **Supply Chain Privacy**: Verify compliance without exposing sensitive data
-5. **Voting Systems**: Attest to valid votes while maintaining privacy
+### 1. **DeFi Protocol Audits**
+- Smart contracts post proofs for third-party verification
+- Auditors bid competitively on review jobs
+- Automated payment upon completion
 
-## 🤝 Contributing
+### 2. **Research Verification**
+- Academic institutions verify complex proofs
+- Peer review through marketplace bidding
+- Reputation-based validator selection
 
-This is a smart contract system deployed on Stacks. To contribute:
-1. Review the contract code
-2. Test on Stacks testnet
-3. Submit issues and improvement proposals
-4. Follow Clarity best practices
+### 3. **Compliance Verification**
+- Regulatory proofs verified by certified validators
+- Competition ensures cost-effectiveness
+- Audit trails for compliance reporting
+
+### 4. **Cross-Chain Verification**
+- Bridge protocols verify proofs from other chains
+- Specialized validators for different ecosystems
+- Economic incentives for accurate verification
+
+### 5. **Privacy Applications**
+- Anonymous credential verification
+- Private computation result validation
+- Zero-knowledge identity proof checking
+
+## 💡 Advanced Features
+
+### Batch Operations
+- Validators can bid on multiple jobs efficiently
+- Bulk job posting for related verifications
+- Optimized gas costs for frequent users
+
+### Reputation Weighting
+- Higher-rated validators can command premium pricing
+- Success rate affects future bid competitiveness
+- Long-term relationship building between clients and validators
+
+### Emergency Functions
+- Job withdrawal for expired listings
+- Fund recovery mechanisms
+- Platform shutdown capabilities
+
+## 🤝 Integration Examples
+
+### Client Integration
+```javascript
+// Post verification job from web app
+const jobResult = await callReadOnlyFunction({
+  contractAddress: 'SP...',
+  contractName: 'zk-marketplace',
+  functionName: 'post-verification-job',
+  functionArgs: [
+    stringAsciiCV('stark'),
+    bufferCV('0x...'),
+    bufferCV('0x...'),
+    bufferCV('0x...'),
+    uintCV(2000000),
+    uintCV(200)
+  ]
+});
+```
+
+### Validator Integration
+```javascript
+// Monitor new jobs and submit bids
+const jobDetails = await callReadOnlyFunction({
+  contractAddress: 'SP...',
+  contractName: 'zk-marketplace', 
+  functionName: 'get-job-details',
+  functionArgs: [uintCV(jobId)]
+});
+
+// Submit competitive bid
+await makeContractCall({
+  contractAddress: 'SP...',
+  contractName: 'zk-marketplace',
+  functionName: 'submit-bid',
+  functionArgs: [
+    uintCV(jobId),
+    uintCV(bidAmount),
+    uintCV(estimatedTime)
+  ]
+});
+```
+
+## 🔮 Future Enhancements
+
+- **Multi-round bidding** with bid increments
+- **Validator staking** for additional security
+- **Cross-protocol verification** job bundling
+- **Oracle integration** for external data verification
+- **Mobile validator apps** for on-the-go bidding
+- **Automated job matching** based on expertise
+- **Insurance mechanisms** for high-value verifications
+
+## ⚠️ Important Considerations
+
+- **Validator Expertise**: Ensure validators have genuine cryptographic knowledge
+- **Job Complexity**: Match job difficulty with validator capabilities  
+- **Economic Incentives**: Balance competitive pricing with quality assurance
+- **Gas Costs**: Consider transaction fees in bid calculations
+- **Time Constraints**: Allow adequate time for thorough verification
 
 ## 📜 License
 
-This project is open source. Please review the specific license terms before use.
+This project is open source. Review license terms before commercial use.
 
-## ⚠️ Disclaimers
+---
 
-- This system is experimental and should be thoroughly audited before mainnet use
-- Certificate holders are responsible for the validity of their underlying proofs
-- Notaries operate independently and their attestations reflect their own assessment
-- STX tokens staked in the system may be at risk
-
+**Note**: This marketplace requires careful economic modeling and should be thoroughly tested and audited before mainnet deployment. The competitive bidding mechanism creates strong incentives for accurate verification while maintaining cost efficiency.
